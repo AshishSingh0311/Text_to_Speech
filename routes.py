@@ -18,7 +18,7 @@ def register_routes(app):
     
     @app.route('/api/tts', methods=['POST'])
     def generate_tts():
-        """API endpoint to generate TTS audio"""
+        """API endpoint to generate TTS audio with advanced features"""
         try:
             # Get request data
             data = request.json
@@ -34,17 +34,24 @@ def register_routes(app):
                     'error': 'Text cannot be empty'
                 }), 400
                 
-            # Check text length
-            if len(text) > 1000:  # Allow slightly more than 400 for buffer
+            # Count words (rough approximation)
+            word_count = len(text.split())
+            
+            # Check text length - allow up to 400 words
+            if word_count > 400:
                 return jsonify({
                     'success': False,
-                    'error': 'Text exceeds maximum length of 400 words'
+                    'error': f'Text exceeds maximum length of 400 words (current: {word_count} words)'
                 }), 400
+            
+            logging.info(f"Generating TTS - Language: {language}, Emotion: {emotion}, Word count: {word_count}")
                 
             # Generate speech
             result = tts_service.generate_speech(text, language, emotion, format)
             
             if result['success']:
+                # Add word count to response
+                result['word_count'] = word_count
                 return jsonify(result)
             else:
                 return jsonify(result), 500

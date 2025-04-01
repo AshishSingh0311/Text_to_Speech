@@ -9,19 +9,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const audioPlayer = document.getElementById('audio-player');
     const downloadLink = document.getElementById('download-link');
     const regenerateBtn = document.getElementById('regenerate-btn');
+    const shareBtn = document.getElementById('share-btn');
     const loadingOverlay = document.getElementById('loading-overlay');
     const characterCount = document.getElementById('character-count');
+    const wordCount = document.getElementById('word-count');
+    const audioInfo = document.getElementById('audio-info');
     const alertContainer = document.getElementById('alert-container');
 
-    // Character counter
+    // Text counters
     inputText.addEventListener('input', function() {
-        const count = this.value.length;
-        characterCount.textContent = `${count}/800 characters`;
+        const text = this.value;
+        const charCount = text.length;
+        const words = text.trim() ? text.trim().split(/\s+/) : [];
+        const wordCountValue = words.length;
         
-        // Change color if approaching or exceeding limit
-        if (count > 800) {
+        // Update character count
+        characterCount.textContent = `${charCount} characters`;
+        
+        // Update word count
+        wordCount.textContent = `${wordCountValue} words`;
+        
+        // Change colors based on limits
+        if (wordCountValue > 400) {
+            wordCount.className = 'badge bg-danger me-2';
+        } else if (wordCountValue > 350) {
+            wordCount.className = 'badge bg-warning me-2';
+        } else {
+            wordCount.className = 'badge bg-primary me-2';
+        }
+        
+        if (charCount > 2000) {
             characterCount.className = 'badge bg-danger';
-        } else if (count > 700) {
+        } else if (charCount > 1500) {
             characterCount.className = 'badge bg-warning';
         } else {
             characterCount.className = 'badge bg-secondary';
@@ -31,6 +50,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Generate speech
     generateBtn.addEventListener('click', generateSpeech);
     regenerateBtn.addEventListener('click', generateSpeech);
+    
+    // Share functionality
+    shareBtn.addEventListener('click', copyAudioLink);
 
     async function generateSpeech() {
         // Validate input
@@ -40,8 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (text.length > 800) {
-            showAlert('Text is too long. Please limit your text to 800 characters.', 'danger');
+        // Count words
+        const wordCountValue = text.split(/\s+/).length;
+        if (wordCountValue > 400) {
+            showAlert(`Text is too long. Please limit your text to 400 words. Current count: ${wordCountValue} words.`, 'danger');
             return;
         }
 
@@ -50,8 +74,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const emotion = emotionSelect.value;
         const format = formatSelect.value;
 
-        // Show loading overlay
+        // Update UI
+        showAlert(`Generating ${emotion} speech in ${getLanguageName(language)}...`, 'info');
         loadingOverlay.classList.remove('d-none');
+        audioInfo.textContent = 'Processing...';
+        audioInfo.className = 'badge bg-warning';
 
         try {
             // Make API request
@@ -74,24 +101,63 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update audio player and download link
                 audioPlayer.src = data.path;
                 downloadLink.href = data.path;
-                downloadLink.download = `speech-${emotion}-${language}.${format}`;
+                downloadLink.download = `neural_speech_${language}_${emotion}.${format}`;
                 
                 // Show audio section
                 audioSection.classList.remove('d-none');
                 
+                // Update audio info
+                const duration = data.duration ? ` (${Math.round(data.duration)}s)` : '';
+                audioInfo.textContent = `${getLanguageName(data.language)} - ${capitalizeFirst(data.emotion)}${duration}`;
+                audioInfo.className = 'badge bg-success';
+                
                 // Play audio
                 audioPlayer.play();
+                
+                // Success message
+                showAlert(`Speech successfully generated with ${capitalizeFirst(emotion)} emotion!`, 'success');
             } else {
                 // Show error
+                audioInfo.textContent = 'Failed';
+                audioInfo.className = 'badge bg-danger';
                 showAlert(`Error: ${data.error || 'Failed to generate speech'}`, 'danger');
             }
         } catch (error) {
             console.error('Error:', error);
+            audioInfo.textContent = 'Error';
+            audioInfo.className = 'badge bg-danger';
             showAlert('Failed to connect to the server. Please try again.', 'danger');
         } finally {
             // Hide loading overlay
             loadingOverlay.classList.add('d-none');
         }
+    }
+    
+    // Copy audio link to clipboard
+    function copyAudioLink() {
+        if (!audioPlayer.src) return;
+        
+        // Get the current URL
+        const audioUrl = audioPlayer.src;
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(audioUrl).then(() => {
+            showAlert('Audio link copied to clipboard!', 'success');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            showAlert('Failed to copy link. Please try again.', 'danger');
+        });
+    }
+    
+    // Get language name from code
+    function getLanguageName(code) {
+        const option = languageSelect.querySelector(`option[value="${code}"]`);
+        return option ? option.textContent : code;
+    }
+    
+    // Capitalize first letter
+    function capitalizeFirst(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     // Show alert message
@@ -127,4 +193,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 150);
         }
     });
+    
+    // Audio player events
+    audioPlayer.addEventListener('play', function() {
+        audioInfo.className = 'badge bg-info animate__animated animate__pulse animate__infinite';
+    });
+    
+    audioPlayer.addEventListener('pause', function() {
+        audioInfo.className = 'badge bg-success';
+    });
+    
+    audioPlayer.addEventListener('ended', function() {
+        audioInfo.className = 'badge bg-secondary';
+    });
+    
+    // Trigger word and character count on load
+    inputText.dispatchEvent(new Event('input'));
 });
