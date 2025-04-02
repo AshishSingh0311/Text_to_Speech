@@ -6,7 +6,7 @@
     <title>Advanced Multilingual Text-to-Speech</title>
     <!-- Replit Bootstrap theme -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    <!-- Font Awesome for icons -->
+    <!-- Font Awesome for icons (using v6.4.0+ for face-* icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/custom.css">
@@ -168,9 +168,36 @@
                         <span id="audio-info" class="badge bg-info">Ready</span>
                     </div>
                     <div class="card-body">
+                        <!-- Emotion visualization with audio waveform -->
+                        <div id="emotion-display" class="text-center mb-3 d-none">
+                            <div class="emotion-container p-2 rounded">
+                                <div class="emotion-icon display-4 mb-1">
+                                    <i id="emotion-icon" class="fas fa-smile"></i>
+                                </div>
+                                <div class="emotion-label">
+                                    <span id="emotion-label" class="badge rounded-pill bg-info">neutral</span>
+                                </div>
+                                
+                                <!-- Audio waveform visualization -->
+                                <div class="waveform mt-2">
+                                    <div class="wave-bars">
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="text-center mb-3">
                             <audio id="audio-player" controls class="w-100"></audio>
                         </div>
+                        
                         <div class="d-flex flex-wrap justify-content-center gap-2">
                             <a id="download-link" class="btn btn-success" download>
                                 <i class="fas fa-download me-2"></i>Download Audio

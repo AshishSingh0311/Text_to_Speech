@@ -215,6 +215,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 audioInfo.textContent = `${getLanguageName(data.language)} - ${voiceInfo} - ${capitalizeFirst(data.emotion)}${effectInfo}${duration}`;
                 audioInfo.className = 'badge bg-success';
                 
+                // Update and show emotion display
+                updateEmotionDisplay(data.emotion);
+                emotionDisplay.classList.remove('d-none');
+                
+                // The waveform will be activated when the audio starts playing
+                
                 // Play audio
                 audioPlayer.play();
                 
@@ -306,17 +312,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Define emotion icon mappings
+    const emotionIcons = {
+        'neutral': {icon: 'fa-meh', animation: ''},
+        'happy': {icon: 'fa-smile-beam', animation: 'pulse'},
+        'sad': {icon: 'fa-sad-tear', animation: 'fade'},
+        'angry': {icon: 'fa-angry', animation: 'shake'},
+        'excited': {icon: 'fa-grin-stars', animation: 'bounce'},
+        'calm': {icon: 'fa-smile', animation: ''},
+        'fearful': {icon: 'fa-grimace', animation: 'wobble'},
+        'whisper': {icon: 'fa-hushed', animation: 'fade'},
+        'shouting': {icon: 'fa-surprise', animation: 'shake'}
+    };
+    
+    // Elements for emotion display
+    const emotionDisplay = document.getElementById('emotion-display');
+    const emotionIcon = document.getElementById('emotion-icon');
+    const emotionLabel = document.getElementById('emotion-label');
+    const waveform = document.querySelector('.waveform');
+    
+    // Update emotion display based on current emotion
+    function updateEmotionDisplay(emotion) {
+        // Default icon if emotion not found
+        let iconClass = 'fa-meh';
+        let animationClass = '';
+        
+        // If we have a mapping for this emotion
+        if (emotionIcons[emotion]) {
+            iconClass = emotionIcons[emotion].icon;
+            animationClass = emotionIcons[emotion].animation;
+        }
+        
+        // Clear previous classes
+        emotionIcon.className = '';
+        
+        // Add new icon and animation classes
+        emotionIcon.classList.add('fas', iconClass, 'emotion-' + emotion);
+        if (animationClass) {
+            emotionIcon.classList.add(animationClass);
+        }
+        
+        // Update label
+        emotionLabel.textContent = emotion;
+        emotionLabel.className = 'badge rounded-pill bg-info';
+    }
+    
     // Audio player events
     audioPlayer.addEventListener('play', function() {
         audioInfo.className = 'badge bg-info animate__animated animate__pulse animate__infinite';
+        
+        // Show emotion display when playing
+        emotionDisplay.classList.remove('d-none');
+        
+        // Get current emotion from the emotion select
+        const currentEmotion = emotionSelect.value;
+        updateEmotionDisplay(currentEmotion);
+        
+        // Activate waveform animation
+        if (waveform) {
+            waveform.classList.add('active');
+        }
     });
     
     audioPlayer.addEventListener('pause', function() {
         audioInfo.className = 'badge bg-success';
+        // We keep the emotion display visible when paused
+        
+        // Pause waveform animation
+        if (waveform) {
+            waveform.classList.remove('active');
+        }
     });
     
     audioPlayer.addEventListener('ended', function() {
         audioInfo.className = 'badge bg-secondary';
+        // Hide emotion display when audio ends
+        //emotionDisplay.classList.add('d-none');
+        
+        // Stop waveform animation
+        if (waveform) {
+            waveform.classList.remove('active');
+        }
     });
     
     // Trigger word and character count on load

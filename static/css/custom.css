@@ -1,228 +1,198 @@
-/* Custom styles for the Advanced TTS application */
-
-/* Audio Player Styling */
-audio {
-    border-radius: 30px;
-    background-color: var(--bs-dark);
-    height: 40px;
-    margin-top: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+/* Emotion display styling */
+.emotion-container {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    padding: 15px 30px;
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
 }
 
-audio::-webkit-media-controls-panel {
-    background-color: var(--bs-dark);
+.emotion-icon {
+    font-size: 3rem;
+    margin-bottom: 5px;
+    transition: transform 0.5s ease;
 }
 
-audio::-webkit-media-controls-play-button {
-    background-color: var(--bs-primary);
-    border-radius: 50%;
+.emotion-icon.pulse {
+    animation: pulse 1.5s infinite;
 }
 
-audio::-webkit-media-controls-current-time-display,
-audio::-webkit-media-controls-time-remaining-display {
-    color: var(--bs-light);
+.emotion-icon.shake {
+    animation: shake 0.5s infinite;
 }
 
-/* Loading Overlay */
+.emotion-icon.bounce {
+    animation: bounce 1s infinite;
+}
+
+.emotion-icon.wobble {
+    animation: wobble 1s infinite;
+}
+
+.emotion-icon.fade {
+    animation: fade 2s infinite;
+}
+
+/* Emotion icon animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(0); }
+    75% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes wobble {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+@keyframes fade {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Emotion colors */
+.emotion-neutral { color: #6c757d; } /* gray */
+.emotion-happy { color: #ffc107; }   /* yellow */
+.emotion-sad { color: #0d6efd; }     /* blue */
+.emotion-angry { color: #dc3545; }   /* red */
+.emotion-excited { color: #fd7e14; } /* orange */
+.emotion-calm { color: #20c997; }    /* teal */
+.emotion-fearful { color: #6f42c1; } /* purple */
+.emotion-whisper { color: #6c757d; } /* gray */
+.emotion-shouting { color: #d63384; } /* pink */
+.emotion-robot { color: #0dcaf0; }   /* cyan */
+
+/* Loading overlay enhancement */
 #loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(4px);
+    z-index: 9999;
 }
 
 .spinner-container {
     text-align: center;
-    padding: 2rem;
-    background-color: rgba(0, 0, 0, 0.4);
-    border-radius: 1rem;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-.spinner-border {
-    width: 3.5rem;
-    height: 3.5rem;
-}
-
-/* Card styling with smooth animations */
-.card {
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: hidden;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.6);
-}
-
-.card-header {
-    background-color: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* Button animations and styling */
-.btn {
+/* Advanced options panel */
+#advancedOptions {
     transition: all 0.3s ease;
-    border-radius: 0.375rem;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
 }
 
-.btn-primary {
-    background: linear-gradient(45deg, var(--bs-primary), #5294ff);
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+/* Audio waveform visualization */
+.waveform {
+    margin: 0 auto;
+    width: 150px;
+    height: 30px;
 }
 
-.btn-success {
-    background: linear-gradient(45deg, var(--bs-success), #4cae4c);
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+.wave-bars {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
-.btn-info {
-    background: linear-gradient(45deg, var(--bs-info), #5bc0de);
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+.wave-bars .bar {
+    width: 6px;
+    height: 100%;
+    background: rgba(var(--bs-primary-rgb), 0.5);
+    border-radius: 3px;
+    animation: none;
 }
 
-.btn-secondary {
-    background: linear-gradient(45deg, var(--bs-secondary), #7a8793);
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+.waveform.active .bar:nth-child(1) {
+    height: 60%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.1s;
 }
 
-.btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+.waveform.active .bar:nth-child(2) {
+    height: 30%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.2s;
 }
 
-.btn:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+.waveform.active .bar:nth-child(3) {
+    height: 75%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.3s;
 }
 
-.btn-lg {
-    padding: 0.75rem 1.5rem;
-    font-size: 1.1rem;
+.waveform.active .bar:nth-child(4) {
+    height: 45%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.4s;
 }
 
-/* Make textarea more prominently visible */
-#input-text {
-    resize: vertical;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    padding: 12px;
-    min-height: 150px;
-    border-radius: 0.5rem;
+.waveform.active .bar:nth-child(5) {
+    height: 90%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.5s;
 }
 
-#input-text:focus {
-    background-color: rgba(255, 255, 255, 0.07);
-    border-color: var(--bs-primary);
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
-    transform: translateY(-1px);
+.waveform.active .bar:nth-child(6) {
+    height: 50%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.4s;
 }
 
-/* Badge styling */
-.badge {
-    padding: 0.5em 0.8em;
-    font-weight: 500;
-    border-radius: 0.375rem;
+.waveform.active .bar:nth-child(7) {
+    height: 60%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.2s;
 }
 
-/* Select inputs styling */
-.form-select {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: var(--bs-light);
-    transition: all 0.2s ease;
+.waveform.active .bar:nth-child(8) {
+    height: 40%;
+    animation: waveform 0.5s infinite ease-in-out alternate;
+    animation-delay: 0.3s;
 }
 
-.form-select:focus {
-    background-color: rgba(255, 255, 255, 0.07);
-    border-color: var(--bs-primary);
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
-}
-
-/* Animation for badge */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-.animate__animated.animate__pulse.animate__infinite {
-    animation: pulse 1.5s infinite;
-}
-
-/* Alert styling */
-.alert {
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: none;
-}
-
-/* Features icons */
-.text-primary {
-    color: #5294ff !important;
-}
-
-.fa-2x {
-    font-size: 2rem;
-}
-
-/* Footer styling */
-footer {
-    margin-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* Responsive fixes */
-@media (max-width: 768px) {
-    .btn {
-        margin-bottom: 0.5rem;
-    }
-    
-    .card-header {
-        flex-direction: column;
-        align-items: start !important;
-    }
-    
-    .card-header div {
-        margin-top: 0.5rem;
-    }
-}
-
-/* Add some smooth page transitions */
-body {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
+@keyframes waveform {
     from {
-        opacity: 0;
+        transform: scaleY(0.5);
     }
     to {
-        opacity: 1;
+        transform: scaleY(1.2);
+    }
+}
+
+/* Audio player enhancements */
+audio {
+    border-radius: 30px;
+    width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .emotion-icon {
+        font-size: 2.5rem;
+    }
+    
+    .emotion-container {
+        padding: 10px 20px;
     }
 }
