@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
+    // DOM Elements - Basic UI
     const inputText = document.getElementById('input-text');
     const languageSelect = document.getElementById('language-select');
     const emotionSelect = document.getElementById('emotion-select');
+    const voiceSelect = document.getElementById('voice-select');
+    const effectSelect = document.getElementById('effect-select');
     const formatSelect = document.getElementById('format-select');
     const generateBtn = document.getElementById('generate-btn');
     const audioSection = document.getElementById('audio-section');
@@ -15,6 +17,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const wordCount = document.getElementById('word-count');
     const audioInfo = document.getElementById('audio-info');
     const alertContainer = document.getElementById('alert-container');
+    const toggleAdvanced = document.getElementById('toggle-advanced');
+    
+    // Advanced slider controls
+    const speedSlider = document.getElementById('speed-slider');
+    const pitchSlider = document.getElementById('pitch-slider');
+    const volumeSlider = document.getElementById('volume-slider');
+    const speedValue = document.getElementById('speed-value');
+    const pitchValue = document.getElementById('pitch-value');
+    const volumeValue = document.getElementById('volume-value');
+    const resetParams = document.getElementById('reset-params');
+    
+    // Flag to track if parameters were customized
+    let usingCustomParameters = false;
+    
+    // Bootstrap collapse - manually initialize for advanced section
+    toggleAdvanced.addEventListener('click', function() {
+        const advancedOptions = document.getElementById('advancedOptions');
+        if (advancedOptions.classList.contains('show')) {
+            advancedOptions.classList.remove('show');
+            toggleAdvanced.innerHTML = '<i class="fas fa-cogs me-1"></i> Advanced Options';
+        } else {
+            advancedOptions.classList.add('show');
+            toggleAdvanced.innerHTML = '<i class="fas fa-minus me-1"></i> Hide Advanced Options';
+        }
+    });
 
     // Text counters
     inputText.addEventListener('input', function() {
@@ -46,6 +73,67 @@ document.addEventListener('DOMContentLoaded', function() {
             characterCount.className = 'badge bg-secondary';
         }
     });
+    
+    // Sliders for advanced parameters
+    speedSlider.addEventListener('input', function() {
+        speedValue.textContent = `${this.value}×`;
+        usingCustomParameters = true;
+    });
+    
+    pitchSlider.addEventListener('input', function() {
+        const sign = this.value > 0 ? '+' : '';
+        pitchValue.textContent = `${sign}${this.value} semitones`;
+        usingCustomParameters = true;
+    });
+    
+    volumeSlider.addEventListener('input', function() {
+        const sign = this.value > 0 ? '+' : '';
+        volumeValue.textContent = `${sign}${this.value} dB`;
+        usingCustomParameters = true;
+    });
+    
+    // Reset parameters to default
+    resetParams.addEventListener('click', function() {
+        speedSlider.value = 1.0;
+        pitchSlider.value = 0;
+        volumeSlider.value = 0;
+        speedValue.textContent = '1.0×';
+        pitchValue.textContent = '+0 semitones';
+        volumeValue.textContent = '+0 dB';
+        usingCustomParameters = false;
+        showAlert('Parameters reset to default values', 'info');
+    });
+
+    // Voice and emotion selection events 
+    voiceSelect.addEventListener('change', function() {
+        updateAudioDescription();
+    });
+    
+    emotionSelect.addEventListener('change', function() {
+        updateAudioDescription();
+    });
+    
+    effectSelect.addEventListener('change', function() {
+        updateAudioDescription();
+    });
+    
+    // Display description of current voice settings
+    function updateAudioDescription() {
+        const voice = voiceSelect.options[voiceSelect.selectedIndex].text;
+        const emotion = emotionSelect.options[emotionSelect.selectedIndex].text;
+        const effect = effectSelect.options[effectSelect.selectedIndex].text;
+        
+        let description = `${voice} voice with ${emotion.toLowerCase()} emotion`;
+        if (effect !== 'No Effect') {
+            description += ` and ${effect.toLowerCase()} effect`;
+        }
+        
+        if (usingCustomParameters) {
+            description += ' (custom parameters)';
+        }
+        
+        showAlert(description, 'info', 3000);
+    }
 
     // Generate speech
     generateBtn.addEventListener('click', generateSpeech);
@@ -69,19 +157,27 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Get selected options
+        // Get basic options
         const language = languageSelect.value;
         const emotion = emotionSelect.value;
+        const voice_type = voiceSelect.value;
         const format = formatSelect.value;
+        const audio_effect = effectSelect.value;
+        
+        // Get custom parameters if enabled
+        const custom_speed = usingCustomParameters ? parseFloat(speedSlider.value) : null;
+        const custom_pitch = usingCustomParameters ? parseInt(pitchSlider.value) : null;
+        const custom_volume = usingCustomParameters ? parseInt(volumeSlider.value) : null;
 
         // Update UI
-        showAlert(`Generating ${emotion} speech in ${getLanguageName(language)}...`, 'info');
+        const voiceName = voiceSelect.options[voiceSelect.selectedIndex].text;
+        showAlert(`Generating ${emotion} speech with ${voiceName} voice in ${getLanguageName(language)}...`, 'info');
         loadingOverlay.classList.remove('d-none');
         audioInfo.textContent = 'Processing...';
         audioInfo.className = 'badge bg-warning';
 
         try {
-            // Make API request
+            // Make API request with all parameters
             const response = await fetch('/api/tts', {
                 method: 'POST',
                 headers: {
@@ -91,6 +187,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     text: text,
                     language: language,
                     emotion: emotion,
+                    voice_type: voice_type,
+                    custom_speed: custom_speed,
+                    custom_pitch: custom_pitch, 
+                    custom_volume: custom_volume,
+                    audio_effect: audio_effect,
                     format: format
                 })
             });
@@ -101,21 +202,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update audio player and download link
                 audioPlayer.src = data.path;
                 downloadLink.href = data.path;
-                downloadLink.download = `neural_speech_${language}_${emotion}.${format}`;
+                downloadLink.download = `neural_speech_${language}_${voice_type}_${emotion}.${format}`;
                 
                 // Show audio section
                 audioSection.classList.remove('d-none');
                 
                 // Update audio info
                 const duration = data.duration ? ` (${Math.round(data.duration)}s)` : '';
-                audioInfo.textContent = `${getLanguageName(data.language)} - ${capitalizeFirst(data.emotion)}${duration}`;
+                const voiceInfo = getVoiceName(data.voice_type);
+                const effectInfo = audio_effect !== 'none' ? ` + ${capitalizeFirst(audio_effect)}` : '';
+                
+                audioInfo.textContent = `${getLanguageName(data.language)} - ${voiceInfo} - ${capitalizeFirst(data.emotion)}${effectInfo}${duration}`;
                 audioInfo.className = 'badge bg-success';
                 
                 // Play audio
                 audioPlayer.play();
                 
                 // Success message
-                showAlert(`Speech successfully generated with ${capitalizeFirst(emotion)} emotion!`, 'success');
+                showAlert(`Speech successfully generated! (${Math.round(data.duration)}s)`, 'success');
             } else {
                 // Show error
                 audioInfo.textContent = 'Failed';
@@ -155,13 +259,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return option ? option.textContent : code;
     }
     
+    // Get voice name from type
+    function getVoiceName(type) {
+        const option = voiceSelect.querySelector(`option[value="${type}"]`);
+        return option ? option.textContent : capitalizeFirst(type);
+    }
+    
     // Capitalize first letter
     function capitalizeFirst(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     // Show alert message
-    function showAlert(message, type = 'info') {
+    function showAlert(message, type = 'info', duration = 5000) {
         const alert = document.createElement('div');
         alert.className = `alert alert-${type} alert-dismissible fade show`;
         alert.innerHTML = `
@@ -172,13 +282,15 @@ document.addEventListener('DOMContentLoaded', function() {
         alertContainer.innerHTML = '';
         alertContainer.appendChild(alert);
         
-        // Auto-dismiss after 5 seconds
+        // Auto-dismiss after duration
         setTimeout(() => {
             alert.classList.remove('show');
             setTimeout(() => {
-                alertContainer.removeChild(alert);
+                if (alert.parentElement) {
+                    alertContainer.removeChild(alert);
+                }
             }, 150);
-        }, 5000);
+        }, duration);
     }
 
     // Handle alert dismissal without Bootstrap JS

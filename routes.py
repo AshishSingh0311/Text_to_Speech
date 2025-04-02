@@ -14,7 +14,14 @@ def register_routes(app):
         """Render the main page"""
         languages = tts_service.get_supported_languages()
         emotions = tts_service.get_supported_emotions()
-        return render_template('index.html', languages=languages, emotions=emotions)
+        voice_types = tts_service.get_voice_types()
+        audio_effects = tts_service.get_audio_effects()
+        
+        return render_template('index.html', 
+                              languages=languages, 
+                              emotions=emotions,
+                              voice_types=voice_types,
+                              audio_effects=audio_effects)
     
     @app.route('/api/tts', methods=['POST'])
     def generate_tts():
@@ -25,7 +32,33 @@ def register_routes(app):
             text = data.get('text', '')
             language = data.get('language', 'en')
             emotion = data.get('emotion', 'neutral')
+            voice_type = data.get('voice_type', 'default')
             format = data.get('format', 'mp3')
+            
+            # Get optional advanced parameters
+            custom_speed = data.get('custom_speed')
+            custom_pitch = data.get('custom_pitch') 
+            custom_volume = data.get('custom_volume')
+            audio_effect = data.get('audio_effect', 'none')
+            
+            # Convert numeric parameters if provided as strings
+            if custom_speed is not None:
+                try:
+                    custom_speed = float(custom_speed)
+                except (ValueError, TypeError):
+                    custom_speed = None
+                    
+            if custom_pitch is not None:
+                try:
+                    custom_pitch = int(custom_pitch)
+                except (ValueError, TypeError):
+                    custom_pitch = None
+                    
+            if custom_volume is not None:
+                try:
+                    custom_volume = int(custom_volume)
+                except (ValueError, TypeError):
+                    custom_volume = None
             
             # Validate input
             if not text or len(text.strip()) == 0:
@@ -44,10 +77,20 @@ def register_routes(app):
                     'error': f'Text exceeds maximum length of 400 words (current: {word_count} words)'
                 }), 400
             
-            logging.info(f"Generating TTS - Language: {language}, Emotion: {emotion}, Word count: {word_count}")
+            logging.info(f"Generating TTS - Language: {language}, Voice: {voice_type}, Emotion: {emotion}, Effect: {audio_effect}, Word count: {word_count}")
                 
-            # Generate speech
-            result = tts_service.generate_speech(text, language, emotion, format)
+            # Generate speech with all parameters
+            result = tts_service.generate_speech(
+                text=text,
+                language=language,
+                emotion=emotion,
+                voice_type=voice_type,
+                custom_speed=custom_speed,
+                custom_pitch=custom_pitch,
+                custom_volume=custom_volume,
+                audio_effect=audio_effect,
+                format=format
+            )
             
             if result['success']:
                 # Add word count to response
@@ -75,6 +118,20 @@ def register_routes(app):
         """API endpoint to get supported emotions"""
         return jsonify({
             'emotions': tts_service.get_supported_emotions()
+        })
+        
+    @app.route('/api/voice-types', methods=['GET'])
+    def get_voice_types():
+        """API endpoint to get supported voice types"""
+        return jsonify({
+            'voice_types': tts_service.get_voice_types()
+        })
+        
+    @app.route('/api/audio-effects', methods=['GET'])
+    def get_audio_effects():
+        """API endpoint to get supported audio effects"""
+        return jsonify({
+            'audio_effects': tts_service.get_audio_effects()
         })
         
     @app.errorhandler(404)

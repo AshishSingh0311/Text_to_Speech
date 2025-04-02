@@ -42,21 +42,35 @@
                 
                 <!-- Language and emotion selection -->
                 <div class="card mb-4">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h2 class="h5 mb-0"><i class="fas fa-sliders-h me-2"></i>Speech Options</h2>
+                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#advancedOptions" aria-expanded="false" aria-controls="advancedOptions" id="toggle-advanced">
+                            <i class="fas fa-cogs me-1"></i> Advanced Options
+                        </button>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="language-select" class="form-label">Language</label>
                                 <select id="language-select" class="form-select">
                                     {% for code, name in languages.items() %}
                                     <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>{{ name }}</option>
                                     {% endfor %}
                                 </select>
-                                <div class="form-text">13 languages including Indian regional languages</div>
+                                <div class="form-text">13 languages including Indian regional</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label for="voice-select" class="form-label">Voice Type</label>
+                                <select id="voice-select" class="form-select">
+                                    {% for voice_id, voice_info in voice_types.items() %}
+                                    <option value="{{ voice_id }}" {% if voice_id == 'default' %}selected{% endif %}>
+                                        {{ voice_info.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Different voice characteristics</div>
+                            </div>
+                            <div class="col-md-3">
                                 <label for="emotion-select" class="form-label">Emotion</label>
                                 <select id="emotion-select" class="form-select">
                                     {% for emotion in emotions %}
@@ -65,15 +79,76 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <div class="form-text">7 expressive emotional responses</div>
+                                <div class="form-text">9 expressive emotional responses</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label for="effect-select" class="form-label">Audio Effect</label>
+                                <select id="effect-select" class="form-select">
+                                    {% for effect_id, effect_info in audio_effects.items() %}
+                                    <option value="{{ effect_id }}" {% if effect_id == 'none' %}selected{% endif %}>
+                                        {% if effect_id == 'none' %}No Effect{% else %}{{ effect_id|capitalize }}{% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Special audio processing effects</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced options (initially collapsed) -->
+                        <div class="collapse mt-4" id="advancedOptions">
+                            <div class="card card-body bg-light border-0">
+                                <h3 class="h6 mb-3"><i class="fas fa-sliders-h me-2"></i>Fine-tune Parameters</h3>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="speed-slider" class="form-label d-flex justify-content-between">
+                                            <span>Speed</span>
+                                            <span id="speed-value">1.0×</span>
+                                        </label>
+                                        <input type="range" class="form-range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0">
+                                        <div class="d-flex justify-content-between">
+                                            <small>Slow</small>
+                                            <small>Fast</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="pitch-slider" class="form-label d-flex justify-content-between">
+                                            <span>Pitch</span>
+                                            <span id="pitch-value">+0 semitones</span>
+                                        </label>
+                                        <input type="range" class="form-range" id="pitch-slider" min="-10" max="10" step="1" value="0">
+                                        <div class="d-flex justify-content-between">
+                                            <small>Lower</small>
+                                            <small>Higher</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="volume-slider" class="form-label d-flex justify-content-between">
+                                            <span>Volume</span>
+                                            <span id="volume-value">+0 dB</span>
+                                        </label>
+                                        <input type="range" class="form-range" id="volume-slider" min="-10" max="10" step="1" value="0">
+                                        <div class="d-flex justify-content-between">
+                                            <small>Quieter</small>
+                                            <small>Louder</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-3">
+                                    <button id="reset-params" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-undo me-1"></i> Reset to Defaults
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-3">
                                 <label for="format-select" class="form-label">Audio Format</label>
                                 <select id="format-select" class="form-select">
                                     <option value="mp3" selected>MP3 (Smaller file)</option>
                                     <option value="wav">WAV (Higher quality)</option>
                                 </select>
-                                <div class="form-text">Select format for downloading</div>
+                                <div class="form-text">Format for downloading</div>
                             </div>
                         </div>
                     </div>
@@ -117,7 +192,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-4">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="d-flex">
                                     <div class="flex-shrink-0">
                                         <i class="fas fa-globe fa-2x text-primary"></i>
@@ -125,27 +200,69 @@
                                     <div class="flex-grow-1 ms-3">
                                         <h3 class="h6">Multilingual Support</h3>
                                         <p class="small text-secondary">
-                                            Support for multiple languages including regional Indian languages 
+                                            Support for 13 languages including regional Indian languages 
                                             like Hindi, Bengali, Tamil, Telugu, and more.
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="d-flex">
                                     <div class="flex-shrink-0">
                                         <i class="fas fa-smile-beam fa-2x text-primary"></i>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h3 class="h6">Emotion Modulation</h3>
+                                        <h3 class="h6">Advanced Emotion Modulation</h3>
                                         <p class="small text-secondary">
-                                            Generate speech with different emotions such as happy, sad, 
-                                            angry, excited, calm, and fearful.
+                                            Generate speech with 9 different emotions: neutral, happy, sad, 
+                                            angry, excited, calm, fearful, whisper and shouting.
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-microphone-alt fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h3 class="h6">Multiple Voice Types</h3>
+                                        <p class="small text-secondary">
+                                            Choose from 6 different voice types including default, male, female, 
+                                            child, elderly, and robot for diverse speech characteristics.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-sliders-h fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h3 class="h6">Custom Parameter Adjustment</h3>
+                                        <p class="small text-secondary">
+                                            Fine-tune speed, pitch, and volume with precision sliders for 
+                                            complete control over the generated speech.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-music fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h3 class="h6">Audio Effects</h3>
+                                        <p class="small text-secondary">
+                                            Apply special audio effects including echo, reverb, chorus, and 
+                                            distortion to create unique and atmospheric speech.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="d-flex">
                                     <div class="flex-shrink-0">
                                         <i class="fas fa-download fa-2x text-primary"></i>
@@ -153,22 +270,8 @@
                                     <div class="flex-grow-1 ms-3">
                                         <h3 class="h6">Download & Share</h3>
                                         <p class="small text-secondary">
-                                            Download generated audio files in MP3 or WAV format for 
-                                            offline use or to share with others.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0">
-                                        <i class="fas fa-brain fa-2x text-primary"></i>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h3 class="h6">Neural Speech Synthesis</h3>
-                                        <p class="small text-secondary">
-                                            Utilizes advanced neural techniques for natural-sounding speech
-                                            with improved intonation and prosody.
+                                            Download generated audio in MP3 or WAV format, and easily share 
+                                            links to your speech creations with others.
                                         </p>
                                     </div>
                                 </div>
