@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const regenerateBtn = document.getElementById('regenerate-btn');
     const shareBtn = document.getElementById('share-btn');
     const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingText = document.getElementById('loading-text');
+    const loadingProgress = document.getElementById('loading-progress');
     const characterCount = document.getElementById('character-count');
     const wordCount = document.getElementById('word-count');
     const audioInfo = document.getElementById('audio-info');
@@ -172,7 +174,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update UI
         const voiceName = voiceSelect.options[voiceSelect.selectedIndex].text;
         showAlert(`Generating ${emotion} speech with ${voiceName} voice in ${getLanguageName(language)}...`, 'info');
-        loadingOverlay.classList.remove('d-none');
+        
+        // Start playful loading animation with fun messages
+        startLoadingAnimation(text.length, emotion, voice_type);
+        
         audioInfo.textContent = 'Processing...';
         audioInfo.className = 'badge bg-warning';
 
@@ -397,4 +402,133 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Trigger word and character count on load
     inputText.dispatchEvent(new Event('input'));
+    
+    // Loading animation variables and messages
+    let loadingInterval = null;
+    let progressValue = 0;
+    let loadingPhase = 0;
+    
+    // Fun loading messages for different emotions and phases
+    const loadingMessages = {
+        initializing: [
+            "Warming up the neural circuits...",
+            "Preparing voice generation...",
+            "Initializing linguistic processors...",
+            "Loading speech patterns..."
+        ],
+        processing: {
+            neutral: ["Generating neutral speech...", "Processing with default emotional settings..."],
+            happy: ["Adding a splash of joy...", "Infusing text with happiness...", "Smiling while speaking..."],
+            sad: ["Adding a touch of melancholy...", "Creating gently sorrowful tones..."],
+            angry: ["Heating up the voice...", "Adding a dash of intensity..."],
+            excited: ["Pumping up the enthusiasm...", "Adding extra energy to speech..."],
+            calm: ["Creating serene speech patterns...", "Smoothing out the voice waves..."],
+            fearful: ["Adding a slight tremble to the voice...", "Creating tension in the audio..."],
+            whisper: ["Lowering the volume...", "Creating gentle hushed tones..."],
+            shouting: ["Amplifying voice projection...", "CRANKING UP THE VOLUME..."]
+        },
+        voiceTypes: {
+            default: ["Configuring baseline voice parameters..."],
+            male: ["Adjusting voice for masculine qualities..."],
+            female: ["Tuning voice for feminine characteristics..."],
+            child: ["Raising pitch for childlike qualities..."],
+            elderly: ["Adding character to the voice..."],
+            robot: ["Initializing synthetic voice components..."]
+        },
+        finalizing: [
+            "Adding final touches...",
+            "Polishing the audio output...",
+            "Packaging the speech...",
+            "Preparing for playback..."
+        ]
+    };
+    
+    // Start the loading animation
+    function startLoadingAnimation(textLength, emotion, voiceType) {
+        // Show the loading overlay
+        loadingOverlay.classList.remove('d-none');
+        
+        // Reset progress
+        progressValue = 0;
+        loadingPhase = 0;
+        loadingProgress.style.width = '0%';
+        
+        // Estimate total time based on text length (just for animation purposes)
+        const estimatedDuration = Math.min(5000 + (textLength / 20) * 100, 12000);
+        const phaseCount = 4; // initialization, processing, voice styling, finalizing
+        const phaseTime = estimatedDuration / phaseCount;
+        
+        // Clear any existing interval
+        if (loadingInterval) {
+            clearInterval(loadingInterval);
+        }
+        
+        // Set the first message
+        const initMessage = loadingMessages.initializing[Math.floor(Math.random() * loadingMessages.initializing.length)];
+        loadingText.textContent = initMessage;
+        
+        // Start the progress animation
+        loadingInterval = setInterval(() => {
+            // Increase progress
+            progressValue += 1;
+            
+            // Max progress for current phase (25%, 50%, 75%, 100%)
+            const phaseMax = (loadingPhase + 1) * 25;
+            
+            // Update progress bar
+            if (progressValue <= phaseMax) {
+                loadingProgress.style.width = `${progressValue}%`;
+                
+                // Move to next phase when current phase completes
+                if (progressValue === phaseMax && loadingPhase < 3) {
+                    loadingPhase++;
+                    updateLoadingMessage(emotion, voiceType);
+                }
+            } else if (progressValue > 100) {
+                // Max out at 100%
+                loadingProgress.style.width = '100%';
+            }
+            
+            // Clear interval when done or after API response
+            if (progressValue >= 100) {
+                clearInterval(loadingInterval);
+                loadingInterval = null;
+            }
+        }, phaseTime / 25); // Divide phase time into 25 steps
+    }
+    
+    // Update loading message based on current phase
+    function updateLoadingMessage(emotion, voiceType) {
+        let message = '';
+        
+        switch (loadingPhase) {
+            case 0: // Initialization
+                message = loadingMessages.initializing[Math.floor(Math.random() * loadingMessages.initializing.length)];
+                break;
+                
+            case 1: // Processing - emotion specific
+                const emotionMessages = loadingMessages.processing[emotion] || loadingMessages.processing.neutral;
+                message = emotionMessages[Math.floor(Math.random() * emotionMessages.length)];
+                break;
+                
+            case 2: // Voice type specific
+                const voiceMessages = loadingMessages.voiceTypes[voiceType] || loadingMessages.voiceTypes.default;
+                message = voiceMessages[Math.floor(Math.random() * voiceMessages.length)];
+                break;
+                
+            case 3: // Finalizing
+                message = loadingMessages.finalizing[Math.floor(Math.random() * loadingMessages.finalizing.length)];
+                break;
+                
+            default:
+                message = "Processing your request...";
+        }
+        
+        // Update the loading text with animation
+        loadingText.style.opacity = "0";
+        setTimeout(() => {
+            loadingText.textContent = message;
+            loadingText.style.opacity = "1";
+        }, 300);
+    }
 });

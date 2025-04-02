@@ -77,22 +77,230 @@
 .emotion-shouting { color: #d63384; } /* pink */
 .emotion-robot { color: #0dcaf0; }   /* cyan */
 
-/* Loading overlay enhancement */
+/* Enhanced Loading Overlay with Playful Animations */
 #loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    backdrop-filter: blur(3px);
 }
 
-.spinner-container {
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
+    padding: 2rem;
+    border-radius: 20px;
+    background: rgba(20, 20, 20, 0.5);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+    max-width: 500px;
+}
+
+/* Voice animation with sound wave effect */
+.voice-animation-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sound-wave {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    width: 200px;
+    position: absolute;
+    bottom: 30px;
+}
+
+.sound-wave .bar {
+    background: linear-gradient(to bottom, #20c997, #0dcaf0);
+    width: 8px;
+    height: 30px;
+    margin: 0 4px;
+    border-radius: 10px;
+    animation: sound-wave 1s infinite ease-in-out alternate;
+}
+
+.sound-wave .bar:nth-child(1) { animation-delay: 0.0s; }
+.sound-wave .bar:nth-child(2) { animation-delay: 0.2s; }
+.sound-wave .bar:nth-child(3) { animation-delay: 0.4s; }
+.sound-wave .bar:nth-child(4) { animation-delay: 0.6s; }
+.sound-wave .bar:nth-child(5) { animation-delay: 0.8s; }
+.sound-wave .bar:nth-child(6) { animation-delay: 0.4s; }
+.sound-wave .bar:nth-child(7) { animation-delay: 0.2s; }
+
+@keyframes sound-wave {
+    0% { height: 10px; }
+    100% { height: 80px; }
+}
+
+/* Character animation */
+.character {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-color: #ffc107;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: float 3s infinite ease-in-out;
+    z-index: 5;
+}
+
+.character-face {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.eyes {
+    display: flex;
+    justify-content: space-between;
+    width: 40px;
+    margin: 0 auto;
+    position: relative;
+    top: 15px;
+}
+
+.eye {
+    width: 10px;
+    height: 10px;
+    background-color: #212529;
+    border-radius: 50%;
+    animation: blink 4s infinite;
+}
+
+.mouth {
+    width: 20px;
+    height: 10px;
+    background-color: #212529;
+    border-radius: 0 0 10px 10px;
+    margin: 25px auto 0;
+    position: relative;
+}
+
+.mouth.speaking {
+    animation: speak 0.8s infinite alternate;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+@keyframes blink {
+    0%, 48%, 52%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.1); }
+}
+
+@keyframes speak {
+    0% { height: 3px; width: 20px; }
+    100% { height: 10px; width: 25px; }
+}
+
+/* Neural network animation */
+.neural-network {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+}
+
+.neuron {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #fd7e14;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.neuron.n1 { top: 20%; left: 20%; animation-delay: 0.2s; }
+.neuron.n2 { top: 70%; left: 25%; animation-delay: 0.5s; }
+.neuron.n3 { top: 40%; left: 50%; animation-delay: 0.8s; }
+.neuron.n4 { top: 80%; left: 60%; animation-delay: 0.3s; }
+.neuron.n5 { top: 30%; left: 80%; animation-delay: 0.6s; }
+
+.connection {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, #fd7e14, #20c997);
+    animation: connection-pulse 2s infinite;
+}
+
+.connection.c1 {
+    width: 80px;
+    top: 22%;
+    left: 25%;
+    transform: rotate(15deg);
+    animation-delay: 0.3s;
+}
+
+.connection.c2 {
+    width: 90px;
+    top: 45%;
+    left: 30%;
+    transform: rotate(-20deg);
+    animation-delay: 0.7s;
+}
+
+.connection.c3 {
+    width: 70px;
+    top: 75%;
+    left: 35%;
+    transform: rotate(30deg);
+    animation-delay: 0.5s;
+}
+
+.connection.c4 {
+    width: 60px;
+    top: 35%;
+    left: 55%;
+    transform: rotate(-15deg);
+    animation-delay: 0.2s;
+}
+
+@keyframes connection-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+/* Loading text animation */
+.loading-text-container {
+    width: 100%;
+    text-align: center;
+}
+
+#loading-text {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: white;
+    animation: text-fade 2s infinite;
+}
+
+#loading-progress {
+    background-color: #20c997;
+    transition: width 0.5s ease;
+}
+
+@keyframes text-fade {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 /* Advanced options panel */

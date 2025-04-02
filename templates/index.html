@@ -310,13 +310,54 @@
         </div>
     </main>
 
-    <!-- Loading overlay -->
+    <!-- Loading overlay with playful animations -->
     <div id="loading-overlay" class="d-none">
-        <div class="spinner-container">
-            <div class="spinner-border text-light" role="status">
-                <span class="visually-hidden">Loading...</span>
+        <div class="loading-container">
+            <!-- Voice animation container -->
+            <div class="voice-animation-container">
+                <div class="sound-wave">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                
+                <!-- Animated character -->
+                <div class="character">
+                    <div class="character-face">
+                        <div class="eyes">
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                        </div>
+                        <div class="mouth speaking"></div>
+                    </div>
+                </div>
+                
+                <!-- Neural network visualization -->
+                <div class="neural-network">
+                    <div class="neuron n1"></div>
+                    <div class="neuron n2"></div>
+                    <div class="neuron n3"></div>
+                    <div class="neuron n4"></div>
+                    <div class="neuron n5"></div>
+                    <div class="connection c1"></div>
+                    <div class="connection c2"></div>
+                    <div class="connection c3"></div>
+                    <div class="connection c4"></div>
+                </div>
             </div>
-            <p class="mt-2 text-light">Generating neural speech...</p>
+            
+            <!-- Loading text with changing messages -->
+            <div class="loading-text-container">
+                <p id="loading-text" class="text-light">Generating neural speech...</p>
+                <div class="progress mt-2">
+                    <div id="loading-progress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
         </div>
     </div>
 
