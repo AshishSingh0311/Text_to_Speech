@@ -1,17 +1,53 @@
-/* Emotion display styling */
+/* Enhanced Emotion display styling */
 .emotion-container {
     display: inline-block;
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 10px;
-    padding: 15px 30px;
-    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    padding: 20px 35px;
+    transition: all 0.4s ease;
     margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Add animated background glow effect based on emotion */
+.emotion-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, var(--emotion-color, rgba(0, 0, 0, 0.05)) 0%, transparent 70%);
+    opacity: 0.5;
+    z-index: -1;
+    transition: opacity 0.5s ease;
+}
+
+.emotion-container.happy::before { --emotion-color: rgba(255, 193, 7, 0.2); }
+.emotion-container.sad::before { --emotion-color: rgba(13, 110, 253, 0.2); }
+.emotion-container.angry::before { --emotion-color: rgba(220, 53, 69, 0.2); }
+.emotion-container.excited::before { --emotion-color: rgba(253, 126, 20, 0.2); }
+.emotion-container.calm::before { --emotion-color: rgba(32, 201, 151, 0.2); }
+.emotion-container.fearful::before { --emotion-color: rgba(111, 66, 193, 0.2); }
+.emotion-container.whisper::before { --emotion-color: rgba(108, 117, 125, 0.1); }
+.emotion-container.shouting::before { --emotion-color: rgba(214, 51, 132, 0.25); }
+
+.emotion-container.active::before {
+    animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
 }
 
 .emotion-icon {
-    font-size: 3rem;
-    margin-bottom: 5px;
-    transition: transform 0.5s ease;
+    font-size: 3.5rem;
+    margin-bottom: 8px;
+    transition: transform 0.5s ease, filter 0.5s ease;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2));
 }
 
 .emotion-icon.pulse {
@@ -65,17 +101,64 @@
     50% { opacity: 0.5; }
 }
 
-/* Emotion colors */
-.emotion-neutral { color: #6c757d; } /* gray */
-.emotion-happy { color: #ffc107; }   /* yellow */
-.emotion-sad { color: #0d6efd; }     /* blue */
-.emotion-angry { color: #dc3545; }   /* red */
-.emotion-excited { color: #fd7e14; } /* orange */
-.emotion-calm { color: #20c997; }    /* teal */
-.emotion-fearful { color: #6f42c1; } /* purple */
-.emotion-whisper { color: #6c757d; } /* gray */
-.emotion-shouting { color: #d63384; } /* pink */
-.emotion-robot { color: #0dcaf0; }   /* cyan */
+/* Enhanced Emotion colors and effects */
+.emotion-neutral { 
+    color: #6c757d; 
+    text-shadow: 0 0 5px rgba(108, 117, 125, 0.3);
+}
+
+.emotion-happy { 
+    color: #ffc107; 
+    text-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+    animation-duration: 1.2s;
+}
+
+.emotion-sad { 
+    color: #0d6efd; 
+    text-shadow: 0 0 8px rgba(13, 110, 253, 0.4);
+    animation-duration: 2s;
+}
+
+.emotion-angry { 
+    color: #dc3545; 
+    text-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+    animation-duration: 0.4s;
+}
+
+.emotion-excited { 
+    color: #fd7e14; 
+    text-shadow: 0 0 12px rgba(253, 126, 20, 0.7);
+    animation-duration: 0.8s;
+}
+
+.emotion-calm { 
+    color: #20c997; 
+    text-shadow: 0 0 6px rgba(32, 201, 151, 0.4);
+}
+
+.emotion-fearful { 
+    color: #6f42c1; 
+    text-shadow: 0 0 10px rgba(111, 66, 193, 0.5);
+    animation-duration: 0.6s;
+}
+
+.emotion-whisper { 
+    color: #6c757d; 
+    text-shadow: 0 0 4px rgba(108, 117, 125, 0.2);
+    opacity: 0.8;
+    animation-duration: 3s;
+}
+
+.emotion-shouting { 
+    color: #d63384; 
+    text-shadow: 0 0 15px rgba(214, 51, 132, 0.8);
+    animation-duration: 0.3s;
+}
+
+.emotion-robot { 
+    color: #0dcaf0; 
+    text-shadow: 0 0 8px rgba(13, 202, 240, 0.6);
+}
 
 /* Enhanced Loading Overlay with Playful Animations */
 #loading-overlay {

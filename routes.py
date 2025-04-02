@@ -95,6 +95,13 @@ def register_routes(app):
             if result['success']:
                 # Add word count to response
                 result['word_count'] = word_count
+                
+                # Add visual emotion parameters for enhanced UI
+                from tts_service import EMOTION_PARAMETERS
+                if emotion in EMOTION_PARAMETERS:
+                    result['emotion_color'] = EMOTION_PARAMETERS[emotion]['color']
+                    result['emotion_animation'] = EMOTION_PARAMETERS[emotion]['animation']
+                
                 return jsonify(result)
             else:
                 return jsonify(result), 500
@@ -116,8 +123,28 @@ def register_routes(app):
     @app.route('/api/emotions', methods=['GET'])
     def get_emotions():
         """API endpoint to get supported emotions"""
+        from tts_service import EMOTION_PARAMETERS
+        
+        # Return both simple list and detailed parameters
+        emotions_simple = tts_service.get_supported_emotions()
+        
+        # Create an enhanced version with visual attributes
+        emotions_enhanced = {}
+        for emotion in emotions_simple:
+            if emotion in EMOTION_PARAMETERS:
+                emotions_enhanced[emotion] = {
+                    'color': EMOTION_PARAMETERS[emotion]['color'],
+                    'animation': EMOTION_PARAMETERS[emotion]['animation'],
+                    'variability': EMOTION_PARAMETERS[emotion]['variability'],
+                    'speed': EMOTION_PARAMETERS[emotion]['speed'],
+                    'pitch': EMOTION_PARAMETERS[emotion]['pitch'],
+                    'volume': EMOTION_PARAMETERS[emotion]['volume'],
+                    'emphasis': EMOTION_PARAMETERS[emotion]['emphasis']
+                }
+        
         return jsonify({
-            'emotions': tts_service.get_supported_emotions()
+            'emotions': emotions_simple,
+            'emotion_parameters': emotions_enhanced
         })
         
     @app.route('/api/voice-types', methods=['GET'])

@@ -220,9 +220,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 audioInfo.textContent = `${getLanguageName(data.language)} - ${voiceInfo} - ${capitalizeFirst(data.emotion)}${effectInfo}${duration}`;
                 audioInfo.className = 'badge bg-success';
                 
-                // Update and show emotion display
+                // Store emotion color and animation from server response if available
+                if (data.emotion_color) {
+                    emotionDisplay.dataset.emotionColor = data.emotion_color;
+                }
+                
+                if (data.emotion_animation) {
+                    emotionDisplay.dataset.emotionAnimation = data.emotion_animation;
+                }
+                
+                // Update and show emotion display with enhanced visuals
                 updateEmotionDisplay(data.emotion);
                 emotionDisplay.classList.remove('d-none');
+                
+                // Apply emotion-specific styling to audio player
+                const audioContainer = document.querySelector('.audio-player-container');
+                if (audioContainer && data.emotion_color) {
+                    // Add subtle border glow based on emotion color
+                    audioContainer.style.boxShadow = `0 0 15px ${data.emotion_color}40`; // 40 = 25% opacity in hex
+                }
                 
                 // The waveform will be activated when the audio starts playing
                 
@@ -336,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const emotionLabel = document.getElementById('emotion-label');
     const waveform = document.querySelector('.waveform');
     
-    // Update emotion display based on current emotion
+    // Update emotion display based on current emotion with enhanced animations
     function updateEmotionDisplay(emotion) {
         // Default icon if emotion not found
         let iconClass = 'fa-meh';
@@ -351,52 +367,171 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear previous classes
         emotionIcon.className = '';
         
+        // Remove all emotion classes from the container
+        const containerClasses = ['happy', 'sad', 'angry', 'excited', 'calm', 'fearful', 'whisper', 'shouting', 'active'];
+        containerClasses.forEach(cls => {
+            emotionDisplay.classList.remove(cls);
+        });
+        
+        // Add emotion class to container for background effects
+        emotionDisplay.classList.add(emotion);
+        emotionDisplay.classList.add('active'); // Activate glow animation
+        
         // Add new icon and animation classes
         emotionIcon.classList.add('fas', iconClass, 'emotion-' + emotion);
         if (animationClass) {
             emotionIcon.classList.add(animationClass);
         }
         
-        // Update label
-        emotionLabel.textContent = emotion;
-        emotionLabel.className = 'badge rounded-pill bg-info';
+        // Update label with emotion-specific styling
+        emotionLabel.textContent = capitalizeFirst(emotion);
+        
+        // Apply emotion-specific color to label
+        let badgeColorClass = 'bg-info';
+        
+        switch(emotion) {
+            case 'happy':
+                badgeColorClass = 'bg-warning text-dark';
+                break;
+            case 'sad':
+                badgeColorClass = 'bg-primary';
+                break;
+            case 'angry':
+                badgeColorClass = 'bg-danger';
+                break;
+            case 'excited':
+                badgeColorClass = 'bg-orange text-dark'; // Bootstrap doesn't have orange by default
+                badgeColorClass = 'bg-warning text-dark'; // Fallback to warning
+                break;
+            case 'calm':
+                badgeColorClass = 'bg-success';
+                break;
+            case 'fearful':
+                badgeColorClass = 'bg-purple'; // Custom class for purple
+                badgeColorClass = 'bg-secondary'; // Fallback if custom not available
+                break;
+            case 'whisper':
+                badgeColorClass = 'bg-secondary';
+                break;
+            case 'shouting':
+                badgeColorClass = 'bg-pink text-white'; // Custom class for pink
+                badgeColorClass = 'bg-danger'; // Fallback if custom not available 
+                break;
+        }
+        
+        emotionLabel.className = `badge rounded-pill ${badgeColorClass}`;
+        
+        // Apply dynamic styling to the audio player interface
+        const audioInfoPanel = document.querySelector('.card-header');
+        if (audioInfoPanel) {
+            // Reset previous styles
+            audioInfoPanel.style.borderColor = '';
+            
+            // Add subtle emotion-based accent
+            if (emotion !== 'neutral') {
+                const emotionColorClass = getComputedStyle(emotionIcon).color;
+                audioInfoPanel.style.borderColor = emotionColorClass;
+            }
+        }
     }
     
-    // Audio player events
+    // Enhanced audio player events with dynamic emotion animations
     audioPlayer.addEventListener('play', function() {
         audioInfo.className = 'badge bg-info animate__animated animate__pulse animate__infinite';
         
         // Show emotion display when playing
         emotionDisplay.classList.remove('d-none');
         
-        // Get current emotion from the emotion select
+        // Get current emotion from the emotion select or from stored data
         const currentEmotion = emotionSelect.value;
+        
+        // Enable dynamic animation effects on play
         updateEmotionDisplay(currentEmotion);
+        emotionDisplay.classList.add('active'); // Activate glow effects
+        
+        // Use server-provided animation if available, otherwise use default
+        let animationClass = emotionDisplay.dataset.emotionAnimation || 
+                            (emotionIcons[currentEmotion] ? emotionIcons[currentEmotion].animation : '');
+        
+        if (animationClass && !emotionIcon.classList.contains(animationClass)) {
+            emotionIcon.classList.add(animationClass);
+        }
+        
+        // Apply dynamic color to waveform based on emotion
+        if (waveform && emotionDisplay.dataset.emotionColor) {
+            const emotionColor = emotionDisplay.dataset.emotionColor;
+            const waveBars = waveform.querySelectorAll('.bar');
+            waveBars.forEach(bar => {
+                bar.style.backgroundColor = emotionColor;
+                bar.style.opacity = '0.7'; // Semi-transparent
+            });
+        }
         
         // Activate waveform animation
         if (waveform) {
             waveform.classList.add('active');
         }
+        
+        // Add a dynamic border to the audio player during playback
+        const audioContainer = document.querySelector('.audio-player-container');
+        if (audioContainer && emotionDisplay.dataset.emotionColor) {
+            audioContainer.style.borderColor = emotionDisplay.dataset.emotionColor;
+            audioContainer.style.transition = 'border-color 0.3s ease';
+        }
     });
     
     audioPlayer.addEventListener('pause', function() {
         audioInfo.className = 'badge bg-success';
-        // We keep the emotion display visible when paused
+        
+        // Reduce animation intensity but keep display visible
+        if (emotionDisplay.classList.contains('active')) {
+            emotionDisplay.classList.remove('active');
+        }
+        
+        // If there's an animation class, temporarily remove it on pause
+        const animationClasses = ['pulse', 'shake', 'bounce', 'wobble', 'fade'];
+        animationClasses.forEach(cls => {
+            if (emotionIcon.classList.contains(cls)) {
+                emotionIcon.dataset.pausedAnimation = cls; // Store for resuming
+                emotionIcon.classList.remove(cls);
+            }
+        });
         
         // Pause waveform animation
         if (waveform) {
             waveform.classList.remove('active');
         }
+        
+        // Subtle visual indicator that playback is paused
+        const audioContainer = document.querySelector('.audio-player-container');
+        if (audioContainer) {
+            audioContainer.style.opacity = '0.9';
+        }
     });
     
     audioPlayer.addEventListener('ended', function() {
         audioInfo.className = 'badge bg-secondary';
-        // Hide emotion display when audio ends
-        //emotionDisplay.classList.add('d-none');
+        
+        // Reduce emotion display intensity but don't hide
+        emotionDisplay.classList.remove('active');
+        
+        // Remove animation classes
+        const animationClasses = ['pulse', 'shake', 'bounce', 'wobble', 'fade'];
+        animationClasses.forEach(cls => {
+            emotionIcon.classList.remove(cls);
+            delete emotionIcon.dataset.pausedAnimation;
+        });
         
         // Stop waveform animation
         if (waveform) {
             waveform.classList.remove('active');
+        }
+        
+        // Reset any dynamic styling
+        const audioContainer = document.querySelector('.audio-player-container');
+        if (audioContainer) {
+            audioContainer.style.borderColor = '';
+            audioContainer.style.opacity = '1';
         }
     });
     
