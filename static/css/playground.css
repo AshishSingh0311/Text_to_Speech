@@ -1,0 +1,308 @@
+/* Sound Wave Playground CSS */
+
+/* Main layout */
+.playground-container {
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin-bottom: 2rem;
+}
+
+.playground-header {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.waveform-container {
+    position: relative;
+    height: 200px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* Interactive waveform */
+#waveform {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.wave-path {
+    stroke-width: 2;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    transition: stroke 0.3s ease;
+}
+
+.wave-path-bg {
+    stroke-width: 6;
+    stroke-opacity: 0.2;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+}
+
+.wave-point {
+    fill: white;
+    cursor: move;
+    transition: fill 0.3s ease, r 0.2s ease;
+}
+
+.wave-point:hover {
+    r: 6;
+}
+
+.wave-point.active {
+    r: 8;
+    fill: var(--bs-primary);
+}
+
+/* Audio controls */
+.control-panel {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.slider-row {
+    margin-bottom: 1.5rem;
+}
+
+.slider-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.slider-value {
+    min-width: 50px;
+    text-align: center;
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+/* Custom slider styling */
+.custom-range {
+    width: 100%;
+    height: 8px;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    appearance: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.custom-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.custom-range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.custom-range::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.custom-range::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Frequency visualization */
+.eq-visualization {
+    height: 100px;
+    position: relative;
+    margin: 1rem 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.eq-bar {
+    position: absolute;
+    bottom: 0;
+    background: linear-gradient(to top, var(--bs-danger), var(--bs-warning), var(--bs-success));
+    border-radius: 3px 3px 0 0;
+    width: 6px;
+    transition: height 0.15s ease;
+}
+
+/* Presets section */
+.presets-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preset-btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    border-width: 2px;
+}
+
+.preset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Emotion presets */
+.emotion-preset {
+    border-radius: 12px;
+    padding: 8px 16px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    opacity: 0.8;
+}
+
+.emotion-preset:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.emotion-preset.active {
+    opacity: 1;
+    border-color: white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Audio player section */
+.audio-player-section {
+    padding: 1.5rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 12px 12px;
+}
+
+.audio-history {
+    margin-top: 1.5rem;
+}
+
+.audio-history-item {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.audio-history-item:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.history-timestamp {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    margin-left: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .waveform-container {
+        height: 150px;
+    }
+    
+    .eq-visualization {
+        height: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    .preset-btn {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .emotion-preset {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation effects */
+.wave-animate {
+    animation: wave-flow 2s infinite ease-in-out;
+}
+
+@keyframes wave-flow {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(10px);
+    }
+}
+
+/* Real-time previews */
+.visualizer {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.visualizer-bars {
+    display: flex;
+    height: 100%;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 10px;
+}
+
+.visualizer-bar {
+    width: 4px;
+    height: 10px;
+    background-color: var(--bs-primary);
+    border-radius: 2px;
+    transition: height 0.1s ease;
+}
+
+/* Highlight current effect */
+[data-effect-type].active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--bs-primary);
+}
+
+/* Tooltip for controls */
+.slider-tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.slider-container:hover .slider-tooltip {
+    opacity: 1;
+}

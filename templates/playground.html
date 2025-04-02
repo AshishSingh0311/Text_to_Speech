@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sound Wave Playground</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/playground.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-soundwave me-2"></i>
+                Neural TTS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/playground">Sound Playground</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <div id="alert-container"></div>
+        
+        <h1 class="mb-4">Interactive Sound Wave Playground</h1>
+        <p class="lead">Manipulate audio in real-time with advanced controls and visualizations.</p>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Main sound playground -->
+                <div class="playground-container">
+                    <div class="playground-header">
+                        <h3 class="mb-0">Sound Wave Visualization</h3>
+                        <small class="text-muted">Drag the control points to reshape the wave</small>
+                    </div>
+                    
+                    <!-- Interactive waveform visualization -->
+                    <div class="waveform-container">
+                        <div id="waveform"></div>
+                    </div>
+                    
+                    <!-- Real-time visualizer -->
+                    <div class="px-3 pt-3">
+                        <h5>Live Preview</h5>
+                        <div class="visualizer">
+                            <div class="visualizer-bars">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Control panel -->
+                    <div class="control-panel">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="slider-row">
+                                    <label class="slider-label">Speed</label>
+                                    <input type="range" class="custom-range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0">
+                                    <span class="slider-value" id="speed-value">1.0x</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="slider-row">
+                                    <label class="slider-label">Pitch</label>
+                                    <input type="range" class="custom-range" id="pitch-slider" min="-10" max="10" step="1" value="0">
+                                    <span class="slider-value" id="pitch-value">0</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="slider-row">
+                                    <label class="slider-label">Volume</label>
+                                    <input type="range" class="custom-range" id="volume-slider" min="-10" max="10" step="1" value="0">
+                                    <span class="slider-value" id="volume-value">0 dB</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5>Equalizer</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="slider-row">
+                                    <label class="slider-label">Bass</label>
+                                    <input type="range" class="custom-range" id="eq-bass-slider" min="-10" max="10" step="1" value="0">
+                                    <span class="slider-value" id="eq-bass-value">0 dB</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="slider-row">
+                                    <label class="slider-label">Mid</label>
+                                    <input type="range" class="custom-range" id="eq-mid-slider" min="-10" max="10" step="1" value="0">
+                                    <span class="slider-value" id="eq-mid-value">0 dB</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="slider-row">
+                                    <label class="slider-label">Treble</label>
+                                    <input type="range" class="custom-range" id="eq-treble-slider" min="-10" max="10" step="1" value="0">
+                                    <span class="slider-value" id="eq-treble-value">0 dB</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5>Audio Effects</h5>
+                        <div class="mb-3">
+                            <div class="btn-group mb-3">
+                                <button type="button" class="btn btn-outline-secondary active" data-effect-type="none">None</button>
+                                <button type="button" class="btn btn-outline-secondary" data-effect-type="echo">Echo</button>
+                                <button type="button" class="btn btn-outline-secondary" data-effect-type="reverb">Reverb</button>
+                                <button type="button" class="btn btn-outline-secondary" data-effect-type="chorus">Chorus</button>
+                                <button type="button" class="btn btn-outline-secondary" data-effect-type="distortion">Distortion</button>
+                            </div>
+                            
+                            <div class="slider-row">
+                                <label class="slider-label">Effect Intensity</label>
+                                <input type="range" class="custom-range" id="effect-intensity-slider" min="0.1" max="1.0" step="0.05" value="0.5">
+                                <span class="slider-value" id="effect-intensity-value">50%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="presets-section">
+                            <h5>Voice Presets</h5>
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-outline-info preset-btn" data-preset="chipmunk">Chipmunk</button>
+                                <button type="button" class="btn btn-outline-info preset-btn" data-preset="giant">Giant</button>
+                                <button type="button" class="btn btn-outline-info preset-btn" data-preset="robot">Robot</button>
+                                <button type="button" class="btn btn-outline-info preset-btn" data-preset="cathedral">Cathedral</button>
+                                <button type="button" class="btn btn-outline-info preset-btn" data-preset="telephone">Telephone</button>
+                                <button type="button" class="btn btn-outline-info preset-btn" data-preset="megaphone">Megaphone</button>
+                            </div>
+                            
+                            <h5>Emotion Presets</h5>
+                            <div class="d-flex flex-wrap">
+                                {% for emotion in emotions %}
+                                    {% if emotion in emotion_parameters %}
+                                        <div class="emotion-preset" 
+                                            style="background-color: {{ emotion_parameters[emotion]['color'] }}33;"
+                                            data-emotion="{{ emotion }}"
+                                            data-speed="{{ emotion_parameters[emotion]['speed'] }}"
+                                            data-pitch="{{ emotion_parameters[emotion]['pitch'] }}"
+                                            data-volume="{{ emotion_parameters[emotion]['volume'] }}"
+                                            data-emphasis="{{ emotion_parameters[emotion]['emphasis'] }}"
+                                            data-variability="{{ emotion_parameters[emotion]['variability'] }}"
+                                            data-color="{{ emotion_parameters[emotion]['color'] }}">
+                                            {{ emotion|capitalize }}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Audio player and history -->
+                <div class="card bg-dark">
+                    <div class="card-header">
+                        <h4 class="mb-0">Audio Player</h4>
+                    </div>
+                    <div class="card-body">
+                        <audio id="audio-player" class="w-100 mb-3" controls></audio>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="play-btn" class="btn btn-primary"><i class="bi bi-play-fill"></i> Play</button>
+                            <button id="stop-btn" class="btn btn-secondary"><i class="bi bi-stop-fill"></i> Stop</button>
+                            <button id="apply-changes-btn" class="btn btn-success"><i class="bi bi-check-circle-fill"></i> Apply Changes</button>
+                            <button id="reset-btn" class="btn btn-danger"><i class="bi bi-arrow-counterclockwise"></i> Reset Settings</button>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h5>Audio History</h5>
+                        <div id="audio-history">
+                            <p class="text-muted">No audio history yet. Apply changes to see your modifications here.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card bg-dark mt-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">Instructions</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li>Generate speech on the main page first</li>
+                            <li>Drag the wave control points to reshape the sound wave</li>
+                            <li>Adjust sliders to modify playback parameters</li>
+                            <li>Use presets for quick transformations</li>
+                            <li>Click "Apply Changes" to process the audio</li>
+                            <li>View history to compare different versions</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-left"></i> Back to Text-to-Speech
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-soundwave me-2"></i> Neural TTS</h5>
+                    <p>An advanced text-to-speech application with emotion modulation and interactive sound manipulation.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Features</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-decoration-none text-light">Text-to-Speech</a></li>
+                        <li><a href="/playground" class="text-decoration-none text-light">Sound Playground</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Resources</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="https://github.com/gtts/gtts" class="text-decoration-none text-light" target="_blank">gTTS</a></li>
+                        <li><a href="https://github.com/jiaaro/pydub" class="text-decoration-none text-light" target="_blank">PyDub</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/playground.js"></script>
+</body>
+</html>
