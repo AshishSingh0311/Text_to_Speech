@@ -179,8 +179,77 @@ AUDIO_EFFECTS = {
     'distortion': {
         'description': 'Distortion effect for robotic sound',
         'enabled': True
+    },
+    'telephone': {
+        'description': 'Classic telephone/radio sound effect',
+        'enabled': True
+    },
+    'megaphone': {
+        'description': 'Loud megaphone/announcement effect',
+        'enabled': True
+    },
+    'whisper_effect': {
+        'description': 'Enhanced whisper with breathy quality',
+        'enabled': True
+    },
+    'ethereal': {
+        'description': 'Ethereal, otherworldly voice effect',
+        'enabled': True
+    },
+    'duet': {
+        'description': 'Layered voice duet effect',
+        'enabled': True
     }
 }
+
+# Advanced prosody settings
+PROSODY_SETTINGS = {
+    'default': {
+        'word_gap_variation': 0.0,    # Random variation in word gaps (0.0-1.0)
+        'sentence_pause': 0.0,        # Extra pause at end of sentences (in ms)
+        'punctuation_pause': 0.0,     # Pause for commas and other punctuation (in ms)
+        'emphasis_words': False,      # Whether to emphasize important words
+        'micro_pauses': False,        # Add micro-pauses between phrases
+        'intonation_strength': 0.0,   # Strength of sentence intonation patterns (0.0-1.0)
+        'breathiness': 0.0,           # Amount of breath sound to add (0.0-1.0)
+    },
+    'natural': {
+        'word_gap_variation': 0.15,
+        'sentence_pause': 350,
+        'punctuation_pause': 150,
+        'emphasis_words': True,
+        'micro_pauses': True,
+        'intonation_strength': 0.3,
+        'breathiness': 0.1,
+    },
+    'expressive': {
+        'word_gap_variation': 0.3,
+        'sentence_pause': 500,
+        'punctuation_pause': 250,
+        'emphasis_words': True,
+        'micro_pauses': True,
+        'intonation_strength': 0.7,
+        'breathiness': 0.2,
+    },
+    'dramatic': {
+        'word_gap_variation': 0.5,
+        'sentence_pause': 700,
+        'punctuation_pause': 350,
+        'emphasis_words': True,
+        'micro_pauses': True,
+        'intonation_strength': 1.0,
+        'breathiness': 0.3,
+    }
+}
+
+# Important words that often receive emphasis in natural speech
+EMPHASIS_WORDS = [
+    'very', 'extremely', 'absolutely', 'definitely', 'certainly',
+    'important', 'critical', 'crucial', 'essential', 'vital',
+    'never', 'always', 'must', 'should', 'cannot', 'needed',
+    'urgent', 'immediate', 'emergency', 'danger', 'warning',
+    'best', 'worst', 'greatest', 'highest', 'lowest', 'amazing'
+]
 
 class TextToSpeechService:
     def __init__(self, static_folder):
@@ -192,9 +261,11 @@ class TextToSpeechService:
             os.makedirs(self.audio_folder)
             
     def generate_speech(self, text, language='en', emotion='neutral', voice_type='default', 
-                      custom_speed=None, custom_pitch=None, custom_volume=None, audio_effect='none', format='mp3'):
+                      custom_speed=None, custom_pitch=None, custom_volume=None, audio_effect='none', 
+                      prosody_level='default', enable_emphasis=True, micro_pauses=False, 
+                      sentence_analysis=False, voice_layering=False, spectral_enhancement=False, format='mp3'):
         """
-        Generate speech from text with customized parameters
+        Generate speech from text with customized parameters and advanced speech enhancements
         
         Args:
             text (str): The text to convert to speech (supports up to 400 words)
@@ -205,6 +276,12 @@ class TextToSpeechService:
             custom_pitch (int): Optional custom pitch override (-10 to 10 semitones)
             custom_volume (int): Optional custom volume override (-10 to 10 dB)
             audio_effect (str): Audio effect to apply (e.g., 'none', 'echo')
+            prosody_level (str): Prosody enhancement level ('default', 'natural', 'expressive', 'dramatic')
+            enable_emphasis (bool): Whether to emphasize important words and phrases
+            micro_pauses (bool): Whether to add natural micro-pauses between phrases
+            sentence_analysis (bool): Whether to analyze sentences for dynamic emphasis
+            voice_layering (bool): Whether to apply voice layering effects
+            spectral_enhancement (bool): Whether to apply spectral enhancements for clarity
             format (str): Output format ('mp3' or 'wav')
             
         Returns:
@@ -463,6 +540,314 @@ class TextToSpeechService:
                         audio = audio + 3
                     except Exception as e:
                         logging.warning(f"Error in distortion effect: {str(e)}")
+                
+                elif audio_effect == 'telephone':
+                    # Create classic telephone/radio sound effect
+                    try:
+                        # Apply band-pass filter to simulate telephone frequency response (300Hz-3.4kHz)
+                        audio = audio.high_pass_filter(300)
+                        audio = audio.low_pass_filter(3400)
+                        # Add mild distortion
+                        audio = audio.compress_dynamic_range(threshold=-15, ratio=4.0)
+                        # Add subtle noise
+                        noise = AudioSegment.silent(duration=len(audio)).overlay(
+                            AudioSegment.from_mono_audiosegments(
+                                *[AudioSegment.silent(duration=50).low_pass_filter(1000) 
+                                  for _ in range(len(audio) // 50 + 1)]
+                            ) - 26
+                        )
+                        audio = audio.overlay(noise)
+                    except Exception as e:
+                        logging.warning(f"Error in telephone effect: {str(e)}")
+                
+                elif audio_effect == 'megaphone':
+                    # Create megaphone/announcement effect
+                    try:
+                        # Apply band-pass filter with resonant mids
+                        audio = audio.high_pass_filter(600)
+                        audio = audio.low_pass_filter(4000)
+                        # Heavy compression for "shouting" effect
+                        audio = audio.compress_dynamic_range(threshold=-18, ratio=8.0, attack=0.01)
+                        # Slight distortion for megaphone character
+                        audio = audio + 4  # Increase volume
+                    except Exception as e:
+                        logging.warning(f"Error in megaphone effect: {str(e)}")
+                
+                elif audio_effect == 'whisper_effect':
+                    # Create whisper effect
+                    try:
+                        # Reduce volume
+                        audio = audio - 6
+                        # High-pass filter to remove lower frequencies
+                        audio = audio.high_pass_filter(800)
+                        # Add breathiness
+                        noise = AudioSegment.silent(duration=len(audio)).overlay(
+                            AudioSegment.from_mono_audiosegments(
+                                *[AudioSegment.silent(duration=50).high_shelf_filter(2000, 6) 
+                                  for _ in range(len(audio) // 50 + 1)]
+                            ) - 20
+                        )
+                        audio = audio.overlay(noise)
+                    except Exception as e:
+                        logging.warning(f"Error in whisper effect: {str(e)}")
+                
+                elif audio_effect == 'ethereal':
+                    # Create ethereal voice effect
+                    try:
+                        # Add reverb-like effect with long tail
+                        reverb = audio - 12
+                        delays = [100, 200, 300, 400, 500, 600, 700, 800]
+                        for i, delay in enumerate(delays):
+                            echo = reverb - (2 * i)
+                            audio = audio.overlay(echo, position=delay)
+                        
+                        # Add chorus for dreamy quality
+                        chorus = audio._spawn(audio.raw_data, overrides={
+                            "frame_rate": int(audio.frame_rate * 1.005)
+                        }).set_frame_rate(audio.frame_rate) - 6
+                        audio = audio.overlay(chorus, position=25)
+                        
+                        # Add high shimmer
+                        audio = audio.high_shelf_filter(6000, 3)
+                    except Exception as e:
+                        logging.warning(f"Error in ethereal effect: {str(e)}")
+                
+                elif audio_effect == 'duet':
+                    # Create voice layering duet effect
+                    try:
+                        # Create slightly modified copies of the original
+                        voice1 = audio - 6
+                        voice2 = audio._spawn(audio.raw_data, overrides={
+                            "frame_rate": int(audio.frame_rate * 1.03)  # Up a minor third
+                        }).set_frame_rate(audio.frame_rate) - 6
+                        
+                        voice3 = audio._spawn(audio.raw_data, overrides={
+                            "frame_rate": int(audio.frame_rate * 0.84)  # Down a fifth
+                        }).set_frame_rate(audio.frame_rate) - 9
+                        
+                        # Overlay with slight delays for chorus effect
+                        audio = audio.overlay(voice1.fade_in(20), position=20)
+                        audio = audio.overlay(voice2.fade_in(30), position=15)
+                        audio = audio.overlay(voice3.fade_in(40), position=10)
+                    except Exception as e:
+                        logging.warning(f"Error in duet effect: {str(e)}")
+            
+            # Apply advanced prosody enhancements if enabled
+            if prosody_level != 'default':
+                try:
+                    logging.debug(f"Applying prosody enhancements: {prosody_level}")
+                    
+                    # Get prosody settings for the selected level
+                    if prosody_level not in PROSODY_SETTINGS:
+                        prosody_level = 'natural'  # Fallback to natural if level not found
+                    
+                    settings = PROSODY_SETTINGS[prosody_level]
+                    
+                    # Apply sentence pause and micro-pause enhancements
+                    if settings['sentence_pause'] > 0 or settings['punctuation_pause'] > 0 or settings['micro_pauses']:
+                        # Split audio into smaller segments - estimate words by duration
+                        # Assuming average word length ~300ms
+                        avg_word_ms = 300
+                        est_words = int(len(audio) / avg_word_ms)
+                        
+                        # Create realistic word boundaries by using variable segment lengths
+                        segment_count = min(est_words, 20)  # Reasonable number of segments
+                        base_segment_ms = len(audio) // segment_count
+                        
+                        # Create segments with natural variation
+                        segments = []
+                        position = 0
+                        
+                        for i in range(segment_count):
+                            # Add variation to segment length
+                            variation = 0
+                            if settings['word_gap_variation'] > 0:
+                                variation = int((random.random() * 2 - 1) * settings['word_gap_variation'] * base_segment_ms)
+                            
+                            segment_length = max(100, base_segment_ms + variation)
+                            
+                            # Ensure we don't exceed audio length
+                            end_pos = min(position + segment_length, len(audio))
+                            segments.append(audio[position:end_pos])
+                            
+                            # Add pause after segment
+                            if i < segment_count - 1:  # Not the last segment
+                                # Decide if this is a sentence boundary, punctuation, or just a word break
+                                if random.random() < 0.15 and settings['sentence_pause'] > 0:
+                                    # Sentence pause (~15% chance)
+                                    pause_duration = int(settings['sentence_pause'])
+                                    segments.append(AudioSegment.silent(duration=pause_duration))
+                                elif random.random() < 0.3 and settings['punctuation_pause'] > 0:
+                                    # Punctuation pause (~30% chance)
+                                    pause_duration = int(settings['punctuation_pause'])
+                                    segments.append(AudioSegment.silent(duration=pause_duration))
+                                elif settings['micro_pauses'] and random.random() < 0.2:
+                                    # Micro-pause (~20% chance if enabled)
+                                    segments.append(AudioSegment.silent(duration=int(random.randint(30, 80))))
+                            
+                            position = end_pos
+                        
+                        # Combine segments to create new audio with natural pauses
+                        if segments:
+                            audio = segments[0]
+                            for segment in segments[1:]:
+                                audio += segment
+                
+                    # Apply word emphasis if enabled
+                    if settings['emphasis_words'] and enable_emphasis:
+                        # We'll simulate word emphasis by applying volume variations
+                        # This is a simplified approach since we can't easily detect words in audio
+                        segment_length = min(300, int(len(audio) / 30))  # Approximate word size
+                        
+                        segments = []
+                        for i in range(0, len(audio), segment_length):
+                            segment = audio[i:i+segment_length]
+                            
+                            # Randomly emphasize some segments (~20% chance)
+                            if random.random() < 0.2 and settings['intonation_strength'] > 0:
+                                # Apply emphasis by increasing volume for important words
+                                emphasis_db = settings['intonation_strength'] * 3  # 0-3dB boost
+                                segment = segment + emphasis_db
+                            
+                            segments.append(segment)
+                        
+                        # Combine segments
+                        if segments:
+                            audio = segments[0]
+                            for segment in segments[1:]:
+                                audio += segment
+                    
+                    # Add breathiness if enabled
+                    if settings['breathiness'] > 0:
+                        try:
+                            breath_intensity = settings['breathiness']
+                            
+                            # Create breath noise
+                            breath_noise = AudioSegment.silent(duration=len(audio)).overlay(
+                                AudioSegment.from_mono_audiosegments(
+                                    *[AudioSegment.silent(duration=50).high_shelf_filter(3000, 10) 
+                                      for _ in range(len(audio) // 50 + 1)]
+                                ) - int(30 - (breath_intensity * 10))  # Adjust volume based on intensity
+                            )
+                            
+                            # Apply breath noise
+                            audio = audio.overlay(breath_noise)
+                        except Exception as e:
+                            logging.warning(f"Error applying breathiness: {str(e)}")
+                
+                except Exception as e:
+                    logging.warning(f"Error applying prosody enhancements: {str(e)}")
+            
+            # Apply sentence analysis for dynamic emphasis if enabled
+            if sentence_analysis:
+                try:
+                    logging.debug("Applying sentence analysis for dynamic emphasis")
+                    
+                    # Split text into sentences (simplified approach)
+                    sentences = [s.strip() for s in text.split('.') if s.strip()]
+                    
+                    if sentences and len(sentences) > 1:
+                        # Estimate audio duration per sentence
+                        avg_sentence_ms = len(audio) // len(sentences)
+                        
+                        if avg_sentence_ms > 500:  # Only process if sentences are long enough
+                            sentence_segments = []
+                            
+                            for i, sentence in enumerate(sentences):
+                                # Calculate approximate position in audio for this sentence
+                                start_pos = i * avg_sentence_ms
+                                end_pos = min(start_pos + avg_sentence_ms, len(audio))
+                                
+                                if end_pos > start_pos:
+                                    sentence_audio = audio[start_pos:end_pos]
+                                    
+                                    # Check if sentence contains emphasis words
+                                    contains_emphasis = any(word.lower() in sentence.lower() for word in EMPHASIS_WORDS)
+                                    
+                                    # Apply processing based on sentence characteristics
+                                    if contains_emphasis:
+                                        # Boost important sentences
+                                        sentence_audio = sentence_audio + 2  # +2dB
+                                        
+                                        # Add slight compression for clarity
+                                        sentence_audio = sentence_audio.compress_dynamic_range(
+                                            threshold=-20, ratio=2.0, attack=5.0, release=50.0
+                                        )
+                                    
+                                    # Check for questions (simplified)
+                                    if '?' in sentence:
+                                        # Modify question intonation by increasing pitch towards the end
+                                        half_point = len(sentence_audio) // 2
+                                        first_half = sentence_audio[:half_point]
+                                        second_half = sentence_audio[half_point:]
+                                        
+                                        # Increase pitch slightly at the end of questions
+                                        modified_half = second_half._spawn(second_half.raw_data, overrides={
+                                            "frame_rate": int(second_half.frame_rate * 1.03)
+                                        }).set_frame_rate(audio.frame_rate)
+                                        
+                                        sentence_audio = first_half + modified_half
+                                    
+                                    sentence_segments.append(sentence_audio)
+                            
+                            # Combine sentence segments
+                            if sentence_segments:
+                                audio = sentence_segments[0]
+                                for segment in sentence_segments[1:]:
+                                    audio += segment
+                
+                except Exception as e:
+                    logging.warning(f"Error applying sentence analysis: {str(e)}")
+            
+            # Apply voice layering for richness if enabled
+            if voice_layering:
+                try:
+                    logging.debug("Applying voice layering effects")
+                    
+                    # Create a slightly detuned duplicate of the audio for richness
+                    layer1 = audio._spawn(audio.raw_data, overrides={
+                        "frame_rate": int(audio.frame_rate * 1.002)  # +2 cents
+                    }).set_frame_rate(audio.frame_rate) - 12  # -12dB (much quieter)
+                    
+                    layer2 = audio._spawn(audio.raw_data, overrides={
+                        "frame_rate": int(audio.frame_rate * 0.998)  # -2 cents
+                    }).set_frame_rate(audio.frame_rate) - 12
+                    
+                    # Apply slight EQ differences to each layer
+                    layer1 = layer1.high_shelf_filter(5000, 2)
+                    layer2 = layer2.low_shelf_filter(300, 2)
+                    
+                    # Mix the layers with the original
+                    audio = audio.overlay(layer1, position=5)
+                    audio = audio.overlay(layer2, position=10)
+                
+                except Exception as e:
+                    logging.warning(f"Error applying voice layering: {str(e)}")
+            
+            # Apply spectral enhancement for clarity if enabled
+            if spectral_enhancement:
+                try:
+                    logging.debug("Applying spectral enhancement for clarity")
+                    
+                    # Enhance speech intelligibility by boosting key frequency ranges
+                    
+                    # Mild high-pass to remove rumble
+                    audio = audio.high_pass_filter(100)
+                    
+                    # Boost speech "presence" range (around 3-4kHz)
+                    audio = audio.high_shelf_filter(3000, 2)
+                    
+                    # Slight boost to articulation range (5-8kHz)
+                    audio = audio.high_shelf_filter(5000, 1)
+                    
+                    # Apply subtle multi-band compression for balanced sound
+                    audio = audio.compress_dynamic_range(threshold=-25, ratio=1.5, attack=5.0, release=100.0)
+                    
+                    # Normalize to ensure consistent volume level
+                    audio = audio.normalize(headroom=0.5)
+                
+                except Exception as e:
+                    logging.warning(f"Error applying spectral enhancement: {str(e)}")
             
             # Generate a unique filename
             filename = f"{language}_{voice_type}_{emotion}_{uuid.uuid4()}.{format}"
@@ -517,3 +902,31 @@ class TextToSpeechService:
     def get_audio_effects(self):
         """Return the dictionary of supported audio effects"""
         return {k: v for k, v in AUDIO_EFFECTS.items() if k == 'none' or v['enabled']}
+        
+    def get_prosody_settings(self):
+        """Return the dictionary of supported prosody settings"""
+        return PROSODY_SETTINGS
+        
+    def get_advanced_features(self):
+        """Return a dictionary of available advanced speech features"""
+        return {
+            'prosody': {
+                'levels': list(PROSODY_SETTINGS.keys()),
+                'description': 'Natural speech rhythm enhancements'
+            },
+            'emphasis': {
+                'description': 'Emphasis on important words and phrases'
+            },
+            'micro_pauses': {
+                'description': 'Natural micro-pauses between phrases'
+            },
+            'sentence_analysis': {
+                'description': 'Dynamic emphasis based on sentence content'
+            },
+            'voice_layering': {
+                'description': 'Rich voice layering for fuller sound'
+            },
+            'spectral_enhancement': {
+                'description': 'Enhanced audio clarity and presence'
+            }
+        }

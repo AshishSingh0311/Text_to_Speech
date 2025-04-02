@@ -16,12 +16,16 @@ def register_routes(app):
         emotions = tts_service.get_supported_emotions()
         voice_types = tts_service.get_voice_types()
         audio_effects = tts_service.get_audio_effects()
+        advanced_features = tts_service.get_advanced_features()
+        prosody_settings = tts_service.get_prosody_settings()
         
         return render_template('index.html', 
                               languages=languages, 
                               emotions=emotions,
                               voice_types=voice_types,
-                              audio_effects=audio_effects)
+                              audio_effects=audio_effects,
+                              advanced_features=advanced_features,
+                              prosody_settings=prosody_settings)
                               
     @app.route('/playground')
     def sound_playground():
@@ -31,12 +35,16 @@ def register_routes(app):
         emotions = tts_service.get_supported_emotions()
         voice_types = tts_service.get_voice_types()
         audio_effects = tts_service.get_audio_effects()
+        advanced_features = tts_service.get_advanced_features()
+        prosody_settings = tts_service.get_prosody_settings()
         
         return render_template('playground.html',
                               emotions=emotions,
                               emotion_parameters=EMOTION_PARAMETERS,
                               voice_types=voice_types,
-                              audio_effects=audio_effects)
+                              audio_effects=audio_effects,
+                              advanced_features=advanced_features,
+                              prosody_settings=prosody_settings)
     
     @app.route('/api/tts', methods=['POST'])
     def generate_tts():
@@ -55,6 +63,14 @@ def register_routes(app):
             custom_pitch = data.get('custom_pitch') 
             custom_volume = data.get('custom_volume')
             audio_effect = data.get('audio_effect', 'none')
+            
+            # Get advanced speech enhancement parameters
+            prosody_level = data.get('prosody_level', 'default')
+            enable_emphasis = data.get('enable_emphasis', True)
+            micro_pauses = data.get('micro_pauses', False)
+            sentence_analysis = data.get('sentence_analysis', False)
+            voice_layering = data.get('voice_layering', False)
+            spectral_enhancement = data.get('spectral_enhancement', False)
             
             # Convert numeric parameters if provided as strings
             if custom_speed is not None:
@@ -92,7 +108,13 @@ def register_routes(app):
                     'error': f'Text exceeds maximum length of 400 words (current: {word_count} words)'
                 }), 400
             
-            logging.info(f"Generating TTS - Language: {language}, Voice: {voice_type}, Emotion: {emotion}, Effect: {audio_effect}, Word count: {word_count}")
+            # Log the generation with basic and advanced parameters
+            logging.info(
+                f"Generating TTS - Language: {language}, Voice: {voice_type}, " 
+                f"Emotion: {emotion}, Effect: {audio_effect}, Word count: {word_count}, "
+                f"Advanced Features: [Prosody: {prosody_level}, Sentence Analysis: {sentence_analysis}, "
+                f"Voice Layering: {voice_layering}, Spectral Enhancement: {spectral_enhancement}]"
+            )
                 
             # Generate speech with all parameters
             result = tts_service.generate_speech(
@@ -104,6 +126,12 @@ def register_routes(app):
                 custom_pitch=custom_pitch,
                 custom_volume=custom_volume,
                 audio_effect=audio_effect,
+                prosody_level=prosody_level,
+                enable_emphasis=enable_emphasis,
+                micro_pauses=micro_pauses,
+                sentence_analysis=sentence_analysis,
+                voice_layering=voice_layering,
+                spectral_enhancement=spectral_enhancement,
                 format=format
             )
             
@@ -174,6 +202,14 @@ def register_routes(app):
         """API endpoint to get supported audio effects"""
         return jsonify({
             'audio_effects': tts_service.get_audio_effects()
+        })
+        
+    @app.route('/api/advanced-features', methods=['GET'])
+    def get_advanced_features():
+        """API endpoint to get supported advanced speech features"""
+        return jsonify({
+            'advanced_features': tts_service.get_advanced_features(),
+            'prosody_settings': tts_service.get_prosody_settings()
         })
         
     @app.route('/api/manipulate-audio', methods=['POST'])
