@@ -305,9 +305,18 @@ class TextToSpeechService:
                     audio = audio.overlay(chorus2, position=30)
                 
                 elif audio_effect == 'distortion':
-                    # Basic distortion effect
-                    audio = audio.compress_dynamic_range(threshold=-20.0, ratio=10.0, attack=0.0, release=10.0)
-                    audio = audio + 3  # Increase volume to compensate for distortion
+                    # Basic distortion effect - make sure we don't divide by zero
+                    audio = audio.compress_dynamic_range(threshold=-20.0, ratio=10.0, attack=0.1, release=10.0)
+                    # Add some bass boost for more intense distortion effect
+                    try:
+                        filter_freq = 100  # Hz
+                        # Use a safe gain that won't cause issues
+                        low_shelf_gain = 5.0  # dB
+                        audio = audio.low_shelf_filter(filter_freq, low_shelf_gain)
+                    except Exception as e:
+                        logging.warning(f"Skipping part of distortion effect: {str(e)}")
+                    # Increase volume to compensate for distortion
+                    audio = audio + 3
             
             # Generate a unique filename
             filename = f"{language}_{voice_type}_{emotion}_{uuid.uuid4()}.{format}"
